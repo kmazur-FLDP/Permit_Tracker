@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h1>Manage Users</h1>
+  <a href="{{ url_for('new_user') }}" class="btn btn-primary mb-3">Add New User</a>
+  <table class="table table-striped">
+    <thead>
+      <tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.role }}</td>
+          <td>
+            <form action="{{ url_for('delete_user', id=u.id) }}" method="post" style="display:inline">
+              <button type="submit" class="btn btn-sm btn-danger"
+                      onclick="return confirm('Delete user?');">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

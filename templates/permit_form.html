@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h1>{{ 'Edit Permit' if permit else 'New Permit' }}</h1>
+
+  <form
+    action="{% if permit %}{{ url_for('edit_permit_form', id=permit.id) }}{% else %}{{ url_for('new_permit_form') }}{% endif %}"
+    method="post"
+    class="mb-4"
+  >
+    <div class="mb-3">
+      <label class="form-label">Project Number</label>
+      <input
+        name="project_number"
+        class="form-control"
+        type="text"
+        required
+        value="{{ permit.project_number if permit else '' }}"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Permit Number</label>
+      <input
+        name="permit_number"
+        class="form-control"
+        type="text"
+        required
+        value="{{ permit.permit_number if permit else '' }}"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Permit Name</label>
+      <input
+        name="permit_name"
+        class="form-control"
+        type="text"
+        value="{{ permit.permit_name or '' }}"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Agency</label>
+      <input
+        name="agency"
+        class="form-control"
+        type="text"
+        value="{{ permit.agency or '' }}"
+      >
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Application Date</label>
+        <input
+          name="application_date"
+          class="form-control"
+          type="date"
+          value="{{ permit.application_date if permit and permit.application_date else '' }}"
+        >
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Issue Date</label>
+        <input
+          name="issue_date"
+          class="form-control"
+          type="date"
+          value="{{ permit.issue_date if permit and permit.issue_date else '' }}"
+        >
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Expiration Date</label>
+        <input
+          name="expiration_date"
+          class="form-control"
+          type="date"
+          value="{{ permit.expiration_date if permit and permit.expiration_date else '' }}"
+        >
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Status</label>
+      <select name="status" class="form-select" required>
+        {% for choice in ['In Waiting','Active','Closed'] %}
+          <option
+            value="{{ choice }}"
+            {% if permit and permit.status == choice %}selected{% endif %}
+          >{{ choice }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-check mb-4">
+      <input
+        name="archived"
+        class="form-check-input"
+        type="checkbox"
+        id="archivedToggle"
+        {% if permit and permit.archived %}checked{% endif %}
+      >
+      <label class="form-check-label" for="archivedToggle">
+        Archive this permit
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      {{ 'Update Permit' if permit else 'Create Permit' }}
+    </button>
+    <a href="{{ url_for('list_permits') }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+{% endblock %}

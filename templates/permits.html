@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h1>All Permits</h1>
+
+  {% if expiring_count %}
+    <div class="alert alert-warning">
+      ⚠️ {{ expiring_count }} permit{{ 's' if expiring_count > 1 }} expiring within 30 days
+    </div>
+  {% endif %}
+
+  <div class="d-flex justify-content-between mb-3">
+    <a href="{{ url_for('new_permit_form') }}" class="btn btn-primary">Add New Permit</a>
+    <a href="{{ url_for('list_permits', show_archived='false' if show_archived else 'true') }}"
+       class="btn btn-outline-secondary">
+      {{ 'Hide Archived' if show_archived else 'Show Archived' }}
+    </a>
+  </div>
+
+  <table id="permits-table" class="table table-striped">
+    <thead>
+      <tr>
+        {% set cols = [
+            ('ID','id'),
+            ('Project #','project_number'),
+            ('Permit #','permit_number'),
+            ('Name','permit_name'),
+            ('Agency','agency'),
+            ('Status','status'),
+            ('Expires','expiration_date')
+          ] %}
+        {% for label, key in cols %}
+          <th class="sortable" data-key="{{ key }}">
+            {{ label }} <span class="sort-indicator">⇅</span>
+          </th>
+        {% endfor %}
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in permits %}
+        <tr class="{% if p.archived %}table-secondary{% elif p.expiring_soon %}table-danger{% endif %}">
+          <td>{{ p.id }}</td>
+          <td><a href="{{ url_for('permit_detail', id=p.id) }}">{{ p.project_number }}</a></td>
+          <td>{{ p.permit_number }}</td>
+          <td>{{ p.permit_name or '' }}</td>
+          <td>{{ p.agency or '' }}</td>
+          <td>{{ p.status or '' }}</td>
+          <td>{{ p.expiration_date or '' }}</td>
+          <td>
+            {% if not p.archived %}
+              <a href="{{ url_for('edit_permit_form', id=p.id) }}" class="btn btn-sm btn-primary">Edit</a>
+            {% endif %}
+            <form action="{{ url_for('delete_permit', id=p.id) }}" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this permit?');">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const table = document.getElementById('permits-table');
+      const headers = table.querySelectorAll('th.sortable');
+      let sortColumn = null;
+      let sortAsc = true;
+
+      headers.forEach((header, idx) => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', () => {
+          if (sortColumn === idx) sortAsc = !sortAsc;
+          else { sortColumn = idx; sortAsc = true; }
+
+          headers.forEach((h, i) => {
+            const ind = h.querySelector('.sort-indicator');
+            if (i === sortColumn) ind.textContent = sortAsc ? '▲' : '▼';
+            else ind.textContent = '⇅';
+          });
+
+          const tbody = table.tBodies[0];
+          Array.from(tbody.rows)
+            .sort((rowA, rowB) => {
+              let a = rowA.cells[idx].textContent.trim();
+              let b = rowB.cells[idx].textContent.trim();
+              const numA = parseFloat(a.replace(/[^0-9\.-]/g, ''));
+              const numB = parseFloat(b.replace(/[^0-9\.-]/g, ''));
+              if (!isNaN(numA) && !isNaN(numB)) return (numA - numB) * (sortAsc ? 1 : -1);
+              return a.localeCompare(b) * (sortAsc ? 1 : -1);
+            })
+            .forEach(row => tbody.appendChild(row));
+        });
+      });
+    });
+  </script>
+{% endblock %}

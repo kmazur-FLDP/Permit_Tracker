@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h1>Permit Details (ID {{ permit.id }})</h1>
+
+  <dl class="row">
+    <dt class="col-sm-3">Project #</dt><dd class="col-sm-9">{{ permit.project_number }}</dd>
+    <dt class="col-sm-3">Permit #</dt><dd class="col-sm-9">{{ permit.permit_number }}</dd>
+    <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ permit.permit_name or '' }}</dd>
+    <dt class="col-sm-3">Agency</dt><dd class="col-sm-9">{{ permit.agency or '' }}</dd>
+    <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{ permit.status or '' }}</dd>
+    <dt class="col-sm-3">Expiration Date</dt><dd class="col-sm-9">{{ permit.expiration_date or '' }}</dd>
+  </dl>
+
+  <hr>
+
+  <!-- Comments Section -->
+  <h2>Comments</h2>
+  <ul class="list-group mb-4">
+    {% if comments %}
+      {% for c in comments %}
+        <li class="list-group-item">
+          <strong>{{ c.email }}</strong>
+          <small class="text-muted">at {{ c.created_at }}</small>
+          <p class="mt-2">{{ c.content }}</p>
+        </li>
+      {% endfor %}
+    {% else %}
+      <li class="list-group-item">No comments yet.</li>
+    {% endif %}
+  </ul>
+
+  <h3>Add a Comment</h3>
+  <form method="post" class="mb-5">
+    <div class="mb-3">
+      <textarea name="content" class="form-control" rows="3" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Post Comment</button>
+  </form>
+
+  <hr>
+
+  <!-- Attachments Section -->
+  <h2>Attachments</h2>
+  <form action="{{ url_for('permit_detail', id=permit.id) }}" method="post" enctype="multipart/form-data" class="mb-4">
+    <div class="input-group">
+      <input type="file" name="file" class="form-control" required>
+      <button type="submit" class="btn btn-outline-primary">Upload File</button>
+    </div>
+  </form>
+
+  <table class="table table-bordered mb-5">
+    <thead>
+      <tr>
+        <th>Version</th>
+        <th>Filename</th>
+        <th>Uploaded By</th>
+        <th>Uploaded At</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if attachments %}
+        {% for a in attachments %}
+          <tr>
+            <td>{{ a.version }}</td>
+            <td>{{ a.filename }}</td>
+            <td>{{ a.email }}</td>
+            <td>{{ a.uploaded_at }}</td>
+            <td>
+              <a href="{{ url_for('get_attachment', id=permit.id, att_id=a.id) }}" class="btn btn-sm btn-primary" target="_blank">
+                View/Download
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr><td colspan="5" class="text-center">No attachments uploaded.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  <hr>
+
+  <!-- Audit Trail Section -->
+  <h2>Audit Trail</h2>
+  <ul class="list-group">
+    {% if audits %}
+      {% for a in audits %}
+        <li class="list-group-item">
+          <strong>{{ a.email }}</strong>
+          <small class="text-muted">{{ a.timestamp }}</small>
+          <span class="ms-2 text-secondary">{{ a.action }}</span>
+        </li>
+      {% endfor %}
+    {% else %}
+      <li class="list-group-item">No audit records available.</li>
+    {% endif %}
+  </ul>
+
+  <a href="{{ url_for('list_permits') }}" class="btn btn-secondary mt-4">Back to List</a>
+{% endblock %}

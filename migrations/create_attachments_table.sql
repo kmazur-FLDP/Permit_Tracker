@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS attachments (
+  id          SERIAL PRIMARY KEY,
+  permit_id   INTEGER NOT NULL REFERENCES permits(id) ON DELETE CASCADE,
+  filename    TEXT    NOT NULL,
+  file_data   BYTEA   NOT NULL,
+  version     INTEGER NOT NULL DEFAULT 1,
+  uploaded_by INTEGER NOT NULL REFERENCES users(id),
+  uploaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
