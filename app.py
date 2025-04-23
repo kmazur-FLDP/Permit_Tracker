@@ -4,6 +4,8 @@ from functools import wraps
 from datetime import datetime, timedelta
 from io import BytesIO
 from dotenv import load_dotenv
+# Load environment variables early
+load_dotenv(override=True)
 from flask import (
     Flask, render_template, request,
     redirect, url_for, flash, abort, send_file
@@ -18,8 +20,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import db  # runs DB connection & migrations on import
 
-# Load environment variables
-load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
